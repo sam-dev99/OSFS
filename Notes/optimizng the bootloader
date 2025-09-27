@@ -1,0 +1,22 @@
+Couple of points on how the bootloader was first designed :
+ - The Bootloader needs to start at 0x7c00
+ - max 512 of bytes
+ - uses 16 BIT arch
+ - last 2 bytes are a signiture of 0x55AA to signal the end of the bootloader
+ - lodsb is a memory fragmenttion that is basically DS:SI 
+    - basically, it takes the address of [DS] * 16 + SI which will 
+    give us the value that we need in SI.
+
+new stuff:
+  - cli to clear interrupts before doing anything else.
+  - ORG at 0
+  - sti to start interruptsafter configuring 0x7c0 (not 0x7c00 because we later multiply bytes
+    16 when we offset with lodsb)
+  
+  - we set ds,es,ss,and sp ourselves because we don't want to make the bios put values for us.
+  - sp points to the top of the stack (and goes downward ) and ss points to where the stack starts from.
+  - we add jmp 0x7c0:start because we want our code segment to start there and not 0
+
+  
+
+  

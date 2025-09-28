@@ -1,0 +1,4 @@
+IVT(interrupt vector table):
+    - it consists of entries (4 bytes each)
+    - each entry is further divided into 2 bytes for offset and another 2 bytes of where    the segment is. the combination of these give us the absolute memory  in RAM.
+    - this allows us to create interrupts and call them based on this scheme.

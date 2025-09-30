@@ -1,0 +1,17 @@
+(PART 1)
+%MOST CHANGES ARE IN MAKEFILE%
+ - what we did is first we removed the kernel code (protected mode)
+ from the original bootloader assembly code (boot.asm). This is the code that starts
+ after the definition of the GDT (Global descriptor table, check osdev).
+ 
+ - we created a kernel.asm code and added that code there.
+ 
+ - we defined  a linker  that will be used in the final stage to produce a binary of the kernel.
+
+ - the idea is that, we first generate a binary from the bootloader and append it to 
+ os.bin, using the "dd" command.
+
+ - we then create the kernel object file with nasm and then use i686- command tool to first:
+    - link all the object files related to $(FILES) variable into one big fullernel.o object file
+    - use i686-gcc tool with the linker that we created above to help us know where to load in memory to create the final binary version of the kernel. no optimization, and no standard libraries used, as we will create them later on ourselves.
+

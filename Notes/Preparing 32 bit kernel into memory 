@@ -15,3 +15,22 @@
     - link all the object files related to $(FILES) variable into one big fullernel.o object file
     - use i686-gcc tool with the linker that we created above to help us know where to load in memory to create the final binary version of the kernel. no optimization, and no standard libraries used, as we will create them later on ourselves.
 
+
+(PART 2)
+After the makefile, we started redesigning the boot.asm file in order to properly load the 32 bit kernel in memory at the proper memory location.
+- There is an entire section of properly setting up something called ATA, which is a mechanism that sits on top of the controller that communicates with the motherboard.(check OSDEV).
+- briefly, we were implementing our own driver in order to properly load the newly created 100 sectors plus the sector that will hold kernel.asm object file. since we cannot use "int 13h" anymore as we are not in real mode programming at that point, but in protected mode. We also cannot write this driver with C as we have no access to any standard library. the set upj is fairly straightforward and can be found on OSDEV.
+
+there is description of eerything in the boot.asm file.
+
+however i need to explain after we are done how to test with GDB that we properly loaded our kernel:
+   1) open gdb on terminal.
+   
+   2) write "add-symbol-file ../build/kernelfull.o 0x100000". the previos command helps gdb load all the associated object files and gets all the symbols (like _start label in our case) that help create kernelfull.o when we constructed it with the cross-compiler-gcc in Makefile. it also tells it to loaded on the location where it should check the code segment start for our kernel.
+   
+   3) break _start: adding a breakpoint of where we want our debugger to break in code, in this case the first label _start that we exported it (remember to export if you ever want to use gdb)
+   "Breakpoint 1 at 0x100000: file ./src/kernel.asm, line 7." you can see it was able to identify where in the source file this breakpoint is.
+
+   4)target remote | qemu-system-x86_64 -S -gdb stdio ./os.bin to start the program
+
+   5) layout asm and then stepi to see the program running and checking the correct memory address.

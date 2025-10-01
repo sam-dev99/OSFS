@@ -60,7 +60,75 @@ gdt_descriptor:
     dw gdt_end - gdt_start-1
     dd gdt_start
 
-[32 BITS]
+[BITS 32]
+;the following is a driver 
 load32:
+    mov eax, 1 ;starting sector to load from
+    mov ecx, 100 ; number of sectors we need to load, remember dd in makefile
+    mov edi, 0x0100000 ; where in memory we need to load
+    call ata_lba_read
+    jmp CODE_SEG:0x0100000
+
+; this is a dummy driver to load our 32 bit mode kernel into protected mode 
+; later we will use a proper C driver to interact with all of this
+ata_lba_read:
+    mov ebx, eax ; Backup the LBA
+    shr eax, 24 ; shift highest 8 bits of eax to the right (32-24)
+    or eax, 0xE0 ; this selects the master drive
+    mov dx, 0x1F6 ; port to right the 8 bits of eax to
+    out dx, al
+    ;Finished sending the highest 8bits of the LBA 
+
+    ; Send total sectors to read
+    mov eax, ecx
+    mov dx, 0x1F2
+    out dx, al
+    ;Finished sending all sectors
+
+    mov eax, ebx ; restore the backp LBA above
+    mov dx, 0x1F3
+    out dx, al ; out command is to communicate with the bus that talks with the controller 
+    ;Finished more bits of LBA
+
+    ;Send more bits of LBA
+    mov dx, 0x1F4
+    mov eax, ebx ; Restore LBA
+    shr eax, 8
+    out dx, al
+    ;Finished more bits of LBA
+
+    ; Send upper 16 bits of the LBA
+    mov dx, 0x1F5
+    mov eax, ebx
+    shr eax, 16
+    out dx, al
+    ; Finished sending  upper 16 bits of the LBA
+
+    mov dx, 0x1F7
+    mov al, 0x20
+    out dx, al
+
+;Read all sectors into memory
+.next_sector:
+    push ecx
+;checking if we need to read because the controller might not be ready yet. 
+.try_again:
+    mov dx, 0x1F7
+    in al, dx ; read from above port
+    test al, 8 ; check for bit
+    jz .try_again ; if check fails
+
+;We need to read 256 words at a time
+    mov ecx, 256
+    mov dx, 0x1F0
+    rep insw; insw reads one word, this case from port 0x1F0 and stores it in ES (edi) in our case
+    ; rep repeats this process 256 times (bytes/1 sector)
+    pop ecx; restore saved stack that we pushed above
+    loop .next_sector
+    ; End of reading sectors into memory
+    ret
+
+
+
 times 510-($ - $$) db 0
 dw 0xAA55

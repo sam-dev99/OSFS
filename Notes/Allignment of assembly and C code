@@ -1,0 +1,11 @@
+Problem
+When the linker does it's job of linking all of the assemble code(kernel.asm) and the C code (later on)
+the problem is that things can get messy on how are the files loaded to the memory, for example some C code sections could be loaded before some assembly lines and so on. The reason is that the format of the output files to be linked are all binary, so there is no distinction between ".asm" or ".c" files. for that reason we use allignment in the linker script in the following matter:
+
+1 - create a new section called ".asm {*(.asm)}" and add it to the end of all the sections in the linker, so after .text(which will contain C code adn kernel code), .data and so on.
+
+2 - in the kernel.asm file, add the "times" instruction from the bootloader to complete 512 bytes. since assembly uses 16 byte allignment, 512%16 is 0, which is perfectly alligned.
+
+3 - in the makefile, we make sure that the $FILES variable starts with kernel.asm.o as the first object file to be linked and loade into memory, otherwise there will be disruptions.
+
+4 - the reason why we did not add the ".asm" section above in the linker above ".text" section, is because it could mess with the C code and the later development of the kernel.

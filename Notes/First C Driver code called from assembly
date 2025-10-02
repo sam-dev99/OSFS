@@ -1,0 +1,1 @@
+We just created our first C code that has an empty function in it. we used extern to be able to use the C function in kernel.asm and call it. check the Makefile on how to create the kernel object file from the C code because there were alot of flags used.

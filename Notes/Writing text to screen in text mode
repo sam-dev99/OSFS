@@ -1,0 +1,19 @@
+GOAL OF THIS DRIVER
+We have built a piece of code that could write a set of characters to the tele-typewriter(terminal).
+TO write a single character, we start writing at address "0xB8000".
+every character is written in the following manner: 
+ - first byte represents the ascii character to write
+ - second byte represents the color formation
+ and so on...
+
+    
+uint16_t* video_mem = (uint16_t*)(0xB8000);
+
+//first byte is fo ascii character
+video_mem[0] = 'A';
+//second byte for color
+video_mem[1] = 2;
+
+//the above was changing row 0 col 0 of the terminal
+video_mem[2] = 'B';
+video_mem[3] = 4;

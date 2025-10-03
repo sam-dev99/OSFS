@@ -1,3 +1,7 @@
 {
-    "makefile.configureOnOpen": true
+    "makefile.configureOnOpen": true,
+    "files.associations": {
+        "kernel.h": "c",
+        "stddef.h": "c"
+    }
 }
